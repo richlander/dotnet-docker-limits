@@ -12,16 +12,15 @@ public class HttpDriver
     {
         var client = new HttpClient();
         var driverTimer = new Stopwatch();
-        var iterationTimer = new Stopwatch();
+        var requestTimer = new Stopwatch();
         var rateDelay = 400;
         var requestCount = 0;
-        var requestCountToLog = 1;
-        var requestCountMaxToLogging = 100000;
+        var requestCountUntilLog = 1;
+        var requestCountMaxUntilLog = 10000;
         var loggingCount = 0;
         var loggingCountUpdateCount = 25;
         var logRequests = false;
         string result = string.Empty;
-        var tasks = new List<Task<string>>();
 
         CancelKeyPress +=  (object sender, ConsoleCancelEventArgs args) =>
         {
@@ -41,7 +40,9 @@ public class HttpDriver
 
             if (progressivelyIncreaseRate)
             {
+                requestTimer.Stop();
                 await Task.Delay(rateDelay);
+                requestTimer.Start();
                 if (rateDelay < 1)
                 {
                     progressivelyIncreaseRate = false;
@@ -52,7 +53,7 @@ public class HttpDriver
                 }
             }
             
-            if (requestCount % requestCountToLog == 0)
+            if (requestCount % requestCountUntilLog == 0)
             {
                 logRequests = true;
             }
@@ -61,37 +62,34 @@ public class HttpDriver
                 logRequests = false;
             }
 
-            var task = client.GetStringAsync(url);
-            tasks.Add(task);
+            try
+            {
+                result = await client.GetStringAsync(url);
+            }
+            catch (Exception e) when (e is System.Net.Http.HttpRequestException || e is System.IO.IOException)
+            {
+                WriteLine($"Request failed at url: {url}");
+                PrintExitMessage(driverTimer.Elapsed, requestCount);
+                return;
+            }
 
             if (logRequests)
             {
-                try 
-                {
-                    await Task.WhenAll(tasks);
-                }
-                catch (Exception e) when (e is System.Net.Http.HttpRequestException || e is System.IO.IOException)
-                {
-                    WriteLine($"Request failed at url: {url}");
-                    PrintExitMessage(driverTimer.Elapsed,requestCount);
-                    return;
-                }
-                result = await tasks[0];
                 var length = result.Length * 8;
-                WriteLine($"request # {requestCount}; requests: {requestCountToLog}; time: {iterationTimer.Elapsed.Seconds}.{iterationTimer.Elapsed.Milliseconds} seconds; Bytes: {length};");
+                var duration = requestTimer.Elapsed;
+                WriteLine($"request: {requestCount}; request count: {requestCountUntilLog}; time: {duration.Seconds}.{duration.Milliseconds}; bytes: {length};");
                 if (showResponse)
                 {
                     WriteLine($"{result}");
                 }
-                tasks.Clear();
-                iterationTimer.Restart();
 
-                if ( loggingCount++ >=loggingCountUpdateCount && 
-                    requestCountToLog < requestCountMaxToLogging)
+                if (loggingCount++ >=loggingCountUpdateCount && 
+                    requestCountUntilLog < requestCountMaxUntilLog)
                 {
-                    requestCountToLog *= 2;
+                    requestCountUntilLog *= 2;
                     loggingCount = 0;
                 }
+                requestTimer.Restart();
             }
 
             requestCount++;

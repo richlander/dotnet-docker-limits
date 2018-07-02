@@ -14,7 +14,16 @@ function KillContainer {
     Param ([string] $container)
     
     Start-Sleep -Milliseconds 500
-    $result = docker ps | grep $container
+
+    $result
+
+    if ($IsWindows)
+    {
+        $result = docker ps | findstr $container
+    }
+    else {
+        $result = docker ps | grep $container
+    } 
 
     if ($result)
     {
