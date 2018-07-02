@@ -15,20 +15,28 @@ function KillContainer {
     
     Start-Sleep -Milliseconds 500
 
-    $result
+    $dockerpsResult
+    $dockerclistResult
 
     if ($IsWindows)
     {
-        $result = docker ps | findstr $container
+        $dockerpsResult = docker ps | findstr $container
+        $dockerclistResult = docker container list -a | findstr $container
     }
     else {
-        $result = docker ps | grep $container
+        $dockerpsResult = docker ps | grep $container
+        $dockerclistResult = docker container list -a | grep $container
     } 
 
-    if ($result)
+    if ($dockerpsResult)
     {
         docker kill $container
     }
+
+    if ($dockerclistResult) {
+        docker container rm $container
+    }
+
 }
 
 Log ".NET Docker resource limits test script"

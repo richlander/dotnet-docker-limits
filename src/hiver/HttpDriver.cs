@@ -77,7 +77,8 @@ public class HttpDriver
             {
                 var length = result.Length * 8;
                 var duration = requestTimer.Elapsed;
-                WriteLine($"request: {requestCount}; request count: {requestCountUntilLog}; time: {duration.Seconds}.{duration.Milliseconds}; bytes: {length};");
+                var perRequestTime = duration.TotalMilliseconds > 0 ? duration.TotalMilliseconds / 1000 / requestCountUntilLog : 0; 
+                WriteLine($"request: {requestCount}; bytes: {length}; request count: {requestCountUntilLog}; time: {duration.Seconds}.{duration.Milliseconds}; time/request: {perRequestTime:N4}");
                 if (showResponse)
                 {
                     WriteLine($"{result}");
