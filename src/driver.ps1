@@ -10,6 +10,18 @@ function Log {
     Write-Output "###### $s"
 }
 
+function KillContainer {
+    Param ([string] $container)
+    
+    Start-Sleep -Milliseconds 500
+    $result = docker ps | grep $container
+
+    if ($result)
+    {
+        docker kill $container
+    }
+}
+
 Log ".NET Docker resource limits test script"
 Log
 Log "Building aspnetapi Docker image"
@@ -20,7 +32,7 @@ Log "Build hiver tool"
 
 dotnet publish hiver/hiver.csproj -c release -o app
 
-docker kill aspnetapi
+KillContainer aspnetapi
 
 while ($true)
 {
@@ -30,7 +42,7 @@ while ($true)
     Start-Sleep -Seconds 1
     dotnet ./hiver/app/hiver.dll $targetUrl --progressivelyIncreaseRate true
 
-    docker kill aspnetapi
+    KillContainer aspnetapi
 
     $memory = $memory + $memoryIncrease
     $memoryIncrease++

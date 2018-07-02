@@ -11,14 +11,14 @@ namespace aspnetapi_driver
         private static Dictionary<string,string> _args = new Dictionary<string, string>();
         private static readonly string PROGRESSIVELY_INCREASE_RATE = "--progressivelyincreaserate";
         private static readonly string SHOW_RESPONSE = "--showresponse";
-        private static readonly string ITERATIONS = "--iterations";
+        private static readonly string REQUESTS = "--requests";
 
         static async Task Main(string[] args)
         {
             // Command-line args
-            // aspnetapi-driver url [--iterations int] [--progressivelyIncreaseRate bool] [--showResponse bool]
+            // aspnetapi-driver url [--requests int] [--progressivelyIncreaseRate bool] [--showResponse bool]
             //var url = "http://localhost:8000/api/values";
-            var iterations = 0;
+            var requests = 0;
             var progressivelyIncreaseRate = false;
             var showResponse = false;
 
@@ -30,9 +30,9 @@ namespace aspnetapi_driver
 
             GetCommandLineArgs(args);
 
-            if (_args.ContainsKey(ITERATIONS))
+            if (_args.ContainsKey(REQUESTS))
             {
-                iterations = int.Parse(_args[ITERATIONS]);
+                requests = int.Parse(_args[REQUESTS]);
             }
 
             if (_args.ContainsKey(SHOW_RESPONSE))
@@ -45,7 +45,7 @@ namespace aspnetapi_driver
                 progressivelyIncreaseRate = _args[PROGRESSIVELY_INCREASE_RATE] == "true" ? true : false;
             }
 
-            await HttpDriver.Go(_url,iterations, progressivelyIncreaseRate, showResponse);
+            await HttpDriver.Go(_url,requests, progressivelyIncreaseRate, showResponse);
         }
 
         static void GetCommandLineArgs(string[] args)
