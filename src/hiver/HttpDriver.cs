@@ -16,7 +16,7 @@ public class HttpDriver
         var rateDelay = 400;
         var requestCount = 0;
         var requestCountUntilLog = 1;
-        var requestCountMaxUntilLog = 10000;
+        var requestCountMaxUntilLog = 4096;
         var loggingCount = 0;
         var loggingCountUpdateCount = 25;
         var logRequests = false;

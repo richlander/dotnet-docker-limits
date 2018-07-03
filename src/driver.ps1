@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 
-$port = 8006
+$port = 8000
 $targetUrl = "http://localhost:$($port)/api/values"
 $memory = 10
 $memoryIncrease = 1
